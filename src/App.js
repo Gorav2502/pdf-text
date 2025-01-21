@@ -70,7 +70,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
 import "./index.css";
 // Use the local worker script from the public folder
-pdfjsLib.GlobalWorkerOptions.workerSrc = `http://localhost:3001/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://pdf-text-mith.vercel.app/pdf.worker.min.js`;
 
 function App() {
   const [text, setText] = useState("");
