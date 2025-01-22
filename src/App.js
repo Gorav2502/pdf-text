@@ -94,36 +94,9 @@ function App() {
     }
   };
 
-  // const extractPDFText = async (file) => {
-  //   try {
-  //     const fileReader = new FileReader();
-  //     fileReader.onload = async (e) => {
-  //       const typedArray = new Uint8Array(e.target.result);
-  //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
-  //       let fullText = "";
 
-  //       for (let i = 1; i <= pdf.numPages; i++) {
-  //         const page = await pdf.getPage(i);
-  //         const textContent = await page.getTextContent();
-  //         const pageText = textContent.items.map((item) => item.str).join(" ");
-  //         fullText += `\n${pageText}`;
-  //       }
 
-  //       // Extract emails using regex
-  //       const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-  //       const foundEmails = fullText.match(emailRegex) || [];
-  //       setEmails(foundEmails);
-
-  //       setText(fullText.trim());
-  //     };
-  //     fileReader.readAsArrayBuffer(file);
-  //   } catch (error) {
-  //     setError("An error occurred while extracting PDF text.");
-  //     console.error("Error extracting PDF text:", error);
-  //   } finally {
-  //     setLoading(false); // End loading state
-  //   }
-  // };
+  // New function to extract emails and phone numbers
   const extractPDFText = async (file) => {
     try {
       const fileReader = new FileReader();
@@ -135,34 +108,39 @@ function App() {
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
-          const items = textContent.items;
 
-          // Extract text and analyze positions
-          items.forEach((item) => {
-            const { str, transform } = item;
-            const yPosition = transform[5]; // Y position of the text
-
-            // Append text with a space after every word
-            if (yPosition > 700) {
-              // Adjust this threshold based on your PDF layout
-              fullText += `${str} `; // Mark as header
-            } else if (yPosition < 50) {
-              // Adjust this threshold based on your PDF layout
-              fullText += `${str} `; // Mark as footer
-            } else {
-              fullText += `${str} `; // Main body text
-            }
+          // Collect items with their positions
+          const itemsWithPositions = textContent.items.map((item) => {
+            const yPosition = item.transform[5]; // Y-coordinate
+            const xPosition = item.transform[4]; // X-coordinate
+            return { text: item.str, x: xPosition, y: yPosition };
           });
+
+          // Sort by Y (descending) and then by X (ascending) for left-to-right, top-to-bottom order
+          itemsWithPositions.sort((a, b) => {
+            if (b.y === a.y) {
+              return a.x - b.x; // If on the same line, sort by X
+            }
+            return b.y - a.y; // Otherwise, sort by Y (descending for top-to-bottom)
+          });
+
+          // Combine the sorted text
+          const pageText = itemsWithPositions
+            .map((item) => item.text)
+            .join(" ");
+          fullText += `${pageText}\n`; // Add newline for each page
         }
 
-        // Trim and add extra spacing between words
-        const spacedText = fullText
-          .trim()
-          .split(" ")
-          .map((word) => `${word} `) // Add a space after every word
-          .join("");
+        // Extract emails using regex
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const foundEmails = fullText.match(emailRegex) || [];
 
-        setText(spacedText.trim()); // Update state with processed text
+        // Add emails at the end of the text
+        if (foundEmails.length > 0) {
+          fullText += `\n\nExtracted Emails:\n${foundEmails.join(", ")}`;
+        }
+
+        setText(fullText.trim()); // Update state with processed text
       };
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
@@ -172,8 +150,6 @@ function App() {
       setLoading(false); // End loading state
     }
   };
-
-  // New function to extract emails and phone numbers
 
   const extractDocxText = async (file) => {
     try {
@@ -218,8 +194,13 @@ function App() {
         {loading ? (
           <p>Processing...</p>
         ) : (
-          <div className="border text-xs   leading-6 p-4 ">
-            <span className=""> {highlightEmails(text)}</span>
+          <div className="grid grid-cols-2  gap-4">
+            <div className="border text-xs   leading-6 p-4 ">
+              <span className=""> {highlightEmails(text)}</span>
+            </div>
+            <div>
+              <textarea className="w-full text-xs h-full" value={text} readOnly  />
+            </div>
           </div>
         )}
 
