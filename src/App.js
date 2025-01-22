@@ -94,8 +94,6 @@ function App() {
     }
   };
 
-
-
   // New function to extract emails and phone numbers
   const extractPDFText = async (file) => {
     try {
@@ -103,44 +101,35 @@ function App() {
       fileReader.onload = async (e) => {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
-        let fullText = "";
+        const sections = { headers: [], body: [], footers: [] }; // Separate sections
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
 
-          // Collect items with their positions
-          const itemsWithPositions = textContent.items.map((item) => {
+          textContent.items.forEach((item) => {
             const yPosition = item.transform[5]; // Y-coordinate
-            const xPosition = item.transform[4]; // X-coordinate
-            return { text: item.str, x: xPosition, y: yPosition };
-          });
+            const text = item.str;
 
-          // Sort by Y (descending) and then by X (ascending) for left-to-right, top-to-bottom order
-          itemsWithPositions.sort((a, b) => {
-            if (b.y === a.y) {
-              return a.x - b.x; // If on the same line, sort by X
+            // Categorize text into sections based on Y position
+            if (yPosition > 700) {
+              sections.headers.push(text); // Header
+            } else if (yPosition < 50) {
+              sections.footers.push(text); // Footer
+            } else {
+              sections.body.push(text); // Main body
             }
-            return b.y - a.y; // Otherwise, sort by Y (descending for top-to-bottom)
           });
-
-          // Combine the sorted text
-          const pageText = itemsWithPositions
-            .map((item) => item.text)
-            .join(" ");
-          fullText += `${pageText}\n`; // Add newline for each page
         }
 
-        // Extract emails using regex
-        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-        const foundEmails = fullText.match(emailRegex) || [];
+        // Combine sections into readable output
+        const formattedText = `
+          Headers:\n${sections.headers.join(" ")}\n\n
+          Body:\n${sections.body.join(" ")}\n\n
+          Footers:\n${sections.footers.join(" ")}
+        `;
 
-        // Add emails at the end of the text
-        if (foundEmails.length > 0) {
-          fullText += `\n\nExtracted Emails:\n${foundEmails.join(", ")}`;
-        }
-
-        setText(fullText.trim()); // Update state with processed text
+        setText(formattedText.trim()); // Update state with section-wise text
       };
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
@@ -199,7 +188,11 @@ function App() {
               <span className=""> {highlightEmails(text)}</span>
             </div>
             <div>
-              <textarea className="w-full text-xs h-full" value={text} readOnly  />
+              <textarea
+                className="w-full text-xs h-full"
+                value={text}
+                readOnly
+              />
             </div>
           </div>
         )}
