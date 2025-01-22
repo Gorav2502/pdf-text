@@ -360,63 +360,141 @@ function App() {
     }
   };
 
+  // const extractPDFText = async (file) => {
+  //   try {
+  //     const fileReader = new FileReader();
+
+  //     fileReader.onload = async (e) => {
+  //       const typedArray = new Uint8Array(e.target.result);
+  //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
+  //       let extractedText = "";
+
+  //       for (let i = 1; i <= pdf.numPages; i++) {
+  //         const page = await pdf.getPage(i);
+  //         const textContent = await page.getTextContent();
+  //         const items = textContent.items;
+
+  //         // Group text fragments by their approximate line (Y position)
+  //         const lines = [];
+  //         const lineMap = new Map();
+
+  //         items.forEach(({ str, transform }) => {
+  //           const yPosition = Math.round(transform[5]); // Round Y position for easier grouping
+  //           if (!lineMap.has(yPosition)) {
+  //             lineMap.set(yPosition, []);
+  //           }
+  //           lineMap.get(yPosition).push({ str, xPosition: transform[4] }); // Collect text fragments and their X positions
+  //         });
+
+  //         // Sort lines by Y position (descending to match natural top-to-bottom reading order)
+  //         const sortedLines = Array.from(lineMap.entries()).sort(
+  //           (a, b) => b[0] - a[0]
+  //         );
+
+  //         // Process each line, ensuring text is not mixed
+  //         sortedLines.forEach(([_, fragments]) => {
+  //           // Sort fragments in the line by X position (left to right)
+  //           fragments.sort((a, b) => a.xPosition - b.xPosition);
+
+  //           // Combine all fragments in the line into a single line of text
+  //           const lineText = fragments.map((f) => f.str).join(" ");
+  //           lines.push(lineText);
+  //         });
+
+  //         // Combine lines into the page's text, maintaining separation between pages
+  //         extractedText += lines.join("\n") + "\n\n"; // Add double line break between pages
+  //       }
+
+  //       // Remove trailing spaces and unnecessary breaks
+  //       extractedText = extractedText.trim();
+
+  //       // Set the extracted text to state or process it as needed
+  //       setText(extractedText); // Use your state update function
+  //     };
+
+  //     fileReader.readAsArrayBuffer(file);
+  //   } catch (error) {
+  //     console.error("Error extracting PDF text:", error);
+  //   } finally {
+  //     setLoading(false); // End loading state
+  //   }
+  // };
+
   const extractPDFText = async (file) => {
     try {
       const fileReader = new FileReader();
+
       fileReader.onload = async (e) => {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
         let extractedText = "";
+        let currentSection = ""; // To hold text for the current section
+
+        const sectionThreshold = 50; // Threshold for large vertical gaps (e.g., 50px between text fragments)
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
           const items = textContent.items;
 
-          // Group text fragments by their approximate line (Y position)
-          const lines = [];
-          const lineMap = new Map();
+          let lastY = null; // Variable to keep track of the last Y position
+          let newSection = false; // Flag to detect new section
 
-          items.forEach(({ str, transform }) => {
-            const yPosition = Math.round(transform[5]); // Round Y position for easier grouping
-            if (!lineMap.has(yPosition)) {
-              lineMap.set(yPosition, []);
+          // Group text by detecting large vertical gaps
+          items.forEach(({ str, transform, width, height }) => {
+            const yPosition = Math.round(transform[5]); // Vertical position of the text
+
+            if (lastY !== null) {
+              const gap = Math.abs(lastY - yPosition); // Calculate the gap between two lines
+
+              if (gap > sectionThreshold) {
+                // If the gap is greater than the threshold, treat it as a new section
+                newSection = true;
+              }
             }
-            lineMap.get(yPosition).push({ str, xPosition: transform[4] }); // Collect text fragments and their X positions
+
+            // If it's a new section, add the previous section's content to the extracted text
+            if (newSection) {
+              extractedText += currentSection + "\n\n"; // Add previous section and clear it for the next one
+              currentSection = ""; // Reset for the next section
+              newSection = false; // Reset new section flag
+            }
+
+            // Append the current text to the section content
+            currentSection += str + " "; // Add space between words
+
+            lastY = yPosition; // Update the last Y position
           });
 
-          // Sort lines by Y position (descending to match natural top-to-bottom reading order)
-          const sortedLines = Array.from(lineMap.entries()).sort(
-            (a, b) => b[0] - a[0]
-          );
-
-          // Process each line
-          sortedLines.forEach(([_, fragments]) => {
-            // Sort fragments in the line by X position (left to right)
-            fragments.sort((a, b) => a.xPosition - b.xPosition);
-
-            // Combine all fragments in the line into a single line of text
-            const lineText = fragments.map((f) => f.str).join(" ");
-            lines.push(lineText);
-          });
-
-          // Combine lines into the page's text
-          extractedText += lines.join("\n") + "\n\n"; // Add double line break between pages
+          // Append the last section content after processing all items
+          extractedText += currentSection + "\n\n";
         }
 
-        // Remove trailing spaces and unnecessary breaks
+        // Clean up and update state with the extracted text
         extractedText = extractedText.trim();
-
-        // Update the extracted text to the state (or process it as needed)
-        setText(extractedText);
+        setText(extractedText); // Your state update function
       };
 
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
-      console.error("Error extracting PDF text:", error);
+      console.error("Error extracting PDF text with sections:", error);
     } finally {
       setLoading(false); // End loading state
     }
+  };
+
+  // Example helper function to check if text is near a border (you can adjust this as per your needs)
+  const checkIfNearBorder = (x, y, width, height) => {
+    // Define a threshold to check if the text is near the left, right, top, or bottom border
+    const borderThreshold = 5; // Change this value as needed
+
+    const isNearVerticalBorder =
+      x <= borderThreshold || x + width >= window.innerWidth - borderThreshold;
+    const isNearHorizontalBorder =
+      y <= borderThreshold ||
+      y + height >= window.innerHeight - borderThreshold;
+
+    return isNearVerticalBorder || isNearHorizontalBorder;
   };
 
   const extractDocxText = async (file) => {
