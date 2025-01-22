@@ -101,40 +101,60 @@ function App() {
       fileReader.onload = async (e) => {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
-        const sections = { headers: [], body: [], footers: [] }; // Separate sections
+
+        const sections = {
+          headers: [],
+          body: [],
+          footers: [],
+        };
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
 
+          // Group items by Y-coordinates (lines)
+          const lines = {};
           textContent.items.forEach((item) => {
-            const yPosition = item.transform[5]; // Y-coordinate
-            const text = item.str;
+            const yPosition = Math.round(item.transform[5]); // Y-coordinate
+            const text = item.str.trim();
 
-            // Categorize text into sections based on Y position
+            if (!lines[yPosition]) {
+              lines[yPosition] = [];
+            }
+            lines[yPosition].push(text);
+          });
+
+          // Sort lines by Y-coordinate (descending for top-to-bottom)
+          const sortedLines = Object.keys(lines)
+            .map(Number)
+            .sort((a, b) => b - a);
+
+          // Process each line and categorize into sections
+          sortedLines.forEach((yPosition) => {
+            const lineText = lines[yPosition].join(" ");
             if (yPosition > 700) {
-              sections.headers.push(text); // Header
+              sections.headers.push(`Page ${i}: ${lineText}`); // Header
             } else if (yPosition < 50) {
-              sections.footers.push(text); // Footer
+              sections.footers.push(`Page ${i}: ${lineText}`); // Footer
             } else {
-              sections.body.push(text); // Main body
+              sections.body.push(`Page ${i}: ${lineText}`); // Body
             }
           });
         }
 
-        // Combine sections into readable output
+        // Format the output for each section
         const formattedText = `
-          Headers:\n${sections.headers.join(" ")}\n\n
-          Body:\n${sections.body.join(" ")}\n\n
-          Footers:\n${sections.footers.join(" ")}
+          Headers:\n${sections.headers.join("\n")}\n\n
+          Body:\n${sections.body.join("\n")}\n\n
+          Footers:\n${sections.footers.join("\n")}
         `;
 
-        setText(formattedText.trim()); // Update state with section-wise text
+        setText(formattedText.trim()); // Update state with sectioned text
       };
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
-      setError("An error occurred while extracting PDF text.");
-      console.error("Error extracting PDF text:", error);
+      setError("An error occurred while extracting text.");
+      console.error("Error extracting text:", error);
     } finally {
       setLoading(false); // End loading state
     }
