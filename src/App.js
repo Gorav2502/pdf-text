@@ -102,14 +102,10 @@ function App() {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
 
-        const sections = {
-          headers: [],
-          body: [],
-          footers: [],
-        };
+        const sectionsByPage = []; // Store sections for each page
 
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
+        for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex++) {
+          const page = await pdf.getPage(pageIndex);
           const textContent = await page.getTextContent();
 
           // Group items by Y-coordinates (lines)
@@ -129,27 +125,49 @@ function App() {
             .map(Number)
             .sort((a, b) => b - a);
 
-          // Process each line and categorize into sections
+          // Initialize sections for the page
+          const pageSections = {
+            headers: [],
+            body: [],
+            footers: [],
+          };
+
+          // Process sorted lines and categorize
           sortedLines.forEach((yPosition) => {
             const lineText = lines[yPosition].join(" ");
-            if (yPosition > 700) {
-              sections.headers.push(`Page ${i}: ${lineText}`); // Header
-            } else if (yPosition < 50) {
-              sections.footers.push(`Page ${i}: ${lineText}`); // Footer
-            } else {
-              sections.body.push(`Page ${i}: ${lineText}`); // Body
+
+            // Header for the first page only
+            if (pageIndex === 1 && yPosition > 700) {
+              pageSections.headers.push(lineText);
             }
+            // Footer for any page
+            else if (yPosition < 50) {
+              pageSections.footers.push(lineText);
+            }
+            // Body for all pages
+            else {
+              pageSections.body.push(lineText);
+            }
+          });
+
+          // Add the sections of this page to the global list
+          sectionsByPage.push({
+            page: pageIndex,
+            sections: pageSections,
           });
         }
 
-        // Format the output for each section
-        const formattedText = `
-          Headers:\n${sections.headers.join("\n")}\n\n
-          Body:\n${sections.body.join("\n")}\n\n
-          Footers:\n${sections.footers.join("\n")}
-        `;
+        // Format output
+        let formattedText = "";
 
-        setText(formattedText.trim()); // Update state with sectioned text
+        sectionsByPage.forEach(({ page, sections }) => {
+          formattedText += ` ${page}:\n`;
+          formattedText += `\n${sections.headers.join("\n")}\n\n`;
+          formattedText += `\n${sections.body.join("\n")}\n\n`;
+          formattedText += `\n${sections.footers.join("\n")}\n\n`;
+        });
+
+        setText(formattedText.trim()); // Update state with formatted text
       };
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
