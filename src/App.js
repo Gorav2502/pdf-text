@@ -95,6 +95,104 @@ function App() {
   };
 
   // New function to extract emails and phone numbers
+  // const extractPDFText = async (file) => {
+  //   try {
+  //     const fileReader = new FileReader();
+  //     fileReader.onload = async (e) => {
+  //       const typedArray = new Uint8Array(e.target.result);
+  //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
+  //       let fullText = "";
+
+  //       for (let i = 1; i <= pdf.numPages; i++) {
+  //         const page = await pdf.getPage(i);
+  //         const textContent = await page.getTextContent();
+  //         const items = textContent.items;
+
+  //         // Use a regular for loop to avoid unsafe references
+  //         for (let j = 0; j < items.length; j++) {
+  //           const { str, transform } = items[j];
+  //           const yPosition = transform[5];
+  //           if (yPosition > 700) {
+  //             fullText += `${str} `; // Header
+  //           } else if (yPosition < 50) {
+  //             fullText += `${str} `; // Footer
+  //           } else {
+  //             fullText += `${str} `; // Main body text
+  //           }
+  //         }
+  //       }
+
+  //       const spacedText = fullText
+  //         .trim()
+  //         .split(" ")
+  //         .map((word) => `${word} `) // Add a space after every word
+  //         .join("");
+
+  //       setText(spacedText.trim()); // Update state with processed text
+  //     };
+  //     fileReader.readAsArrayBuffer(file);
+  //   } catch (error) {
+  //     console.error("Error extracting PDF text:", error);
+  //   } finally {
+  //     setLoading(false); // End loading state
+  //   }
+  // };
+  // const extractPDFText = async (file) => {
+  //   try {
+  //     const fileReader = new FileReader();
+  //     fileReader.onload = async (e) => {
+  //       const typedArray = new Uint8Array(e.target.result);
+  //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
+
+  //       let extractedText = "";
+  //       let previousYPosition = null;
+  //       const sectionThreshold = 100; // Threshold to detect breaks between sections or paragraphs
+  //       const lineBreakThreshold = 5; // Threshold to detect new lines (based on Y-position difference)
+  //       let currentPageText = "";
+
+  //       // Loop through all pages of the PDF
+  //       for (let i = 1; i <= pdf.numPages; i++) {
+  //         const page = await pdf.getPage(i);
+  //         const textContent = await page.getTextContent();
+  //         const items = textContent.items;
+
+  //         // Loop through all items (text fragments) on the page
+  //         for (let j = 0; j < items.length; j++) {
+  //           const { str, transform } = items[j];
+  //           const yPosition = transform[5]; // Extract the Y position for text placement
+
+  //           // Detect new lines based on Y position difference
+  //           if (
+  //             previousYPosition &&
+  //             Math.abs(previousYPosition - yPosition) > lineBreakThreshold
+  //           ) {
+  //             currentPageText += "\n"; // Add line break if the Y position differs significantly
+  //           }
+
+  //           currentPageText += `${str} `; // Add the current text fragment
+  //           previousYPosition = yPosition; // Update the Y position for comparison
+  //         }
+
+  //         // Once we finish processing the page, add the page text to the full extracted text
+  //         extractedText += currentPageText.trim() + "\n\n"; // Ensure there's a space between pages
+  //         currentPageText = ""; // Reset for next page text
+  //       }
+
+  //       // Remove trailing spaces and unnecessary line breaks
+  //       extractedText = extractedText.trim();
+
+  //       // Update state with the extracted text, preserving its structure
+  //       setText(extractedText);
+  //     };
+
+  //     fileReader.readAsArrayBuffer(file);
+  //   } catch (error) {
+  //     console.error("Error extracting PDF text:", error);
+  //   } finally {
+  //     setLoading(false); // End loading state
+  //   }
+  // };
+
   const extractPDFText = async (file) => {
     try {
       const fileReader = new FileReader();
@@ -102,77 +200,54 @@ function App() {
         const typedArray = new Uint8Array(e.target.result);
         const pdf = await pdfjsLib.getDocument(typedArray).promise;
 
-        const sectionsByPage = []; // Store sections for each page
+        let extractedText = "";
 
-        for (let pageIndex = 1; pageIndex <= pdf.numPages; pageIndex++) {
-          const page = await pdf.getPage(pageIndex);
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
+          const items = textContent.items;
 
-          // Group items by Y-coordinates (lines)
-          const lines = {};
-          textContent.items.forEach((item) => {
-            const yPosition = Math.round(item.transform[5]); // Y-coordinate
-            const text = item.str.trim();
+          // Group text fragments by their approximate line (Y position)
+          const lines = [];
+          const lineMap = new Map();
 
-            if (!lines[yPosition]) {
-              lines[yPosition] = [];
+          items.forEach(({ str, transform }) => {
+            const yPosition = Math.round(transform[5]); // Round Y position for easier grouping
+            if (!lineMap.has(yPosition)) {
+              lineMap.set(yPosition, []);
             }
-            lines[yPosition].push(text);
+            lineMap.get(yPosition).push({ str, xPosition: transform[4] }); // Collect text fragments and their X positions
           });
 
-          // Sort lines by Y-coordinate (descending for top-to-bottom)
-          const sortedLines = Object.keys(lines)
-            .map(Number)
-            .sort((a, b) => b - a);
+          // Sort lines by Y position (descending to match natural top-to-bottom reading order)
+          const sortedLines = Array.from(lineMap.entries()).sort(
+            (a, b) => b[0] - a[0]
+          );
 
-          // Initialize sections for the page
-          const pageSections = {
-            headers: [],
-            body: [],
-            footers: [],
-          };
+          // Process each line
+          sortedLines.forEach(([_, fragments]) => {
+            // Sort fragments in the line by X position (left to right)
+            fragments.sort((a, b) => a.xPosition - b.xPosition);
 
-          // Process sorted lines and categorize
-          sortedLines.forEach((yPosition) => {
-            const lineText = lines[yPosition].join(" ");
-
-            // Header for the first page only
-            if (pageIndex === 1 && yPosition > 700) {
-              pageSections.headers.push(lineText);
-            }
-            // Footer for any page
-            else if (yPosition < 50) {
-              pageSections.footers.push(lineText);
-            }
-            // Body for all pages
-            else {
-              pageSections.body.push(lineText);
-            }
+            // Combine all fragments in the line into a single line of text
+            const lineText = fragments.map((f) => f.str).join(" ");
+            lines.push(lineText);
           });
 
-          // Add the sections of this page to the global list
-          sectionsByPage.push({
-            page: pageIndex,
-            sections: pageSections,
-          });
+          // Combine lines into the page's text
+          extractedText += lines.join("\n") + "\n\n"; // Add double line break between pages
         }
 
-        // Format output
-        let formattedText = "";
+        // Remove trailing spaces and unnecessary breaks
+        extractedText = extractedText.trim();
 
-        sectionsByPage.forEach(({ page, sections }) => {
-          formattedText += ` ${page}:\n`;
-          formattedText += `\n${sections.headers.join("\n")}\n\n`;
-          formattedText += `\n${sections.body.join("\n")}\n\n`;
-          formattedText += `\n${sections.footers.join("\n")}\n\n`;
-        });
-
-        setText(formattedText.trim()); // Update state with formatted text
+        // Update the extracted text to the state (or process it as needed)
+        setText(extractedText);
       };
+
       fileReader.readAsArrayBuffer(file);
     } catch (error) {
-      setError("An error occurred while extracting text.");
-      console.error("Error extracting text:", error);
+      console.error("Error extracting PDF text:", error);
     } finally {
       setLoading(false); // End loading state
     }
