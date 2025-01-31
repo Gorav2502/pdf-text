@@ -667,41 +667,41 @@ function App() {
     }
   };
 
+  const processExtractedText = (text) => {
+    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+    const numberRegex =
+      /\b(?:\+\d{1,3}\s?)?(?:\d{10,13}|\(\d{3}\)\s?\d{3}-?\d{4})\b/g;
+
+    const emails = [...new Set(text.match(emailRegex) || [])];
+    const numbers = [...new Set(text.match(numberRegex) || [])];
+
+    setData({ text, email: emails, contactNumber: numbers });
+  };
+
   // const processExtractedText = (text) => {
   //   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-  //   const numberRegex =
-  //     /\b(?:\+\d{1,3}\s?)?(?:\d{10,13}|\(\d{3}\)\s?\d{3}-?\d{4})\b/g;
+  //   const numberRegex = /\b(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4})\b/g;
 
   //   const emails = [...new Set(text.match(emailRegex) || [])];
   //   const numbers = [...new Set(text.match(numberRegex) || [])];
 
-  //   setData({ text, email: emails, contactNumber: numbers });
+  //   // Normalize numbers with their country codes and ensure proper format
+  //   const formattedNumbers = numbers.map((number) => {
+  //     let formattedNumber = number.replace(/\D/g, '');  // Remove all non-digit characters
+  //     if (formattedNumber.length === 10) {
+  //       // Assuming country code +91 for India
+  //       formattedNumber = '+91 ' + formattedNumber;  // Add a default country code if none exists
+  //     } else if (formattedNumber.length > 10 && formattedNumber.startsWith('91')) {
+  //       // Handle numbers with the country code
+  //       formattedNumber = `+${formattedNumber.slice(0, 2)} ${formattedNumber.slice(2)}`;
+  //     }
+
+  //     return formattedNumber;
+  //   });
+
+  //   setData({ text, email: emails, contactNumber: formattedNumbers });
   // };
 
-  const processExtractedText = (text) => {
-    const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
-    const numberRegex = /\b(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4})\b/g;
-  
-    const emails = [...new Set(text.match(emailRegex) || [])];
-    const numbers = [...new Set(text.match(numberRegex) || [])];
-  
-    // Normalize numbers with their country codes and ensure proper format
-    const formattedNumbers = numbers.map((number) => {
-      let formattedNumber = number.replace(/\D/g, '');  // Remove all non-digit characters
-      if (formattedNumber.length === 10) {
-        // Assuming country code +91 for India
-        formattedNumber = '+91 ' + formattedNumber;  // Add a default country code if none exists
-      } else if (formattedNumber.length > 10 && formattedNumber.startsWith('91')) {
-        // Handle numbers with the country code
-        formattedNumber = `+${formattedNumber.slice(0, 2)} ${formattedNumber.slice(2)}`;
-      }
-  
-      return formattedNumber;
-    });
-  
-    setData({ text, email: emails, contactNumber: formattedNumbers });
-  };
-  
   return (
     <div>
       <div className="flex p-4">
