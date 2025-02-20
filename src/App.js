@@ -148,7 +148,7 @@ const App = () => {
 
   const handleStartOrStop = async () => {
     const formData = {
-      cmd: !isOn ? "start" : "stop",
+      // cmd: !isOn ? "start" : "stop",
       query: query,
     };
 
@@ -156,11 +156,11 @@ const App = () => {
 
     try {
       const response = await axios.post(
-        "https://your-api-endpoint.com/action",
+        "https://stagingapi.jivahire.com/api/fetch/",
         formData
       );
 
-      if (response?.data?.success) {
+      if (response?.data?.message === "Successful") {
         toast.success(response?.data?.message);
         localStorage.setItem("git_status", response?.data?.status);
         localStorage.setItem("query", query);
@@ -200,39 +200,8 @@ const App = () => {
               ref={gitAgentbuttonref}
               className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 w-80 font-inter flex flex-col gap-2"
             >
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">
-                  {localStorage.getItem("git_status") || "Stopped"}
-                </span>
-                {/* Toggle Switch */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    disabled={!query}
-                    onClick={() => {
-                      setIsOn(!isOn);
-                      handleStartOrStop();
-                    }}
-                    className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
-                      isOn ? "bg-green-400" : "bg-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-                        isOn ? "translate-x-6" : "translate-x-0"
-                      }`}
-                    ></span>
-                  </button>
-                  <span
-                    className={`text-sm font-semibold ${
-                      isOn ? "text-gray-800" : "text-gray-400"
-                    }`}
-                  >
-                    {isOn ? "ON" : "OFF"}
-                  </span>
-                </div>
-              </div>
-
               {/* Query Input */}
+              <div>Input Query</div>
               <textarea
                 rows={5}
                 value={query || ""}
@@ -241,6 +210,7 @@ const App = () => {
                 className="border outline-none px-3 py-2 w-full h-10 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-400"
                 onChange={(e) => setQuery(e.target.value)}
               />
+              <button className="bg-blue-400 text-white px-4 py-2 rounded-lg" onClick={() => handleStartOrStop()}>Search Query</button>
             </div>
           )}
         </div>
@@ -268,16 +238,14 @@ const App = () => {
                     {selectAll ? "Unselect All" : "Select All"}
                   </button>
                 </th>
-                <th className="border px-4 py-3 text-left">ID</th>
-                <th className="border px-4 py-3 text-left">Title</th>
-                <th className="border px-4 py-3 text-left">Link</th>
-                <th className="border px-4 py-3 text-left">HTML Title</th>
-                <th className="border px-4 py-3 text-left">Display Link</th>
-                <th className="border px-4 py-3 text-left ">htmlSnippet</th>
+                <th className="border px-4 py-3 text-center">S.No</th>
+                <th className="border px-4 py-3 text-center">Title</th>
+                <th className="border px-4 py-3 text-center">Link</th>
+                <th className="border px-4 py-3 text-center ">Snippet</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
+              {apiData?.map((item, index) => (
                 <tr
                   key={item.id}
                   className={`${
@@ -291,8 +259,21 @@ const App = () => {
                       onChange={() => handleCheckboxChange(item.id)}
                     />
                   </td>
-                  <td className="border px-4 py-3">{item.id}</td>
-                  <td className="border px-4 py-3">{item.title}</td>
+                  <td className="border px-4 py-3 text-center">{index + 1}</td>
+
+                  <td className="border px-4 py-3">
+                    {" "}
+                    <div className=" flex gap-4">
+                      <div className="min-w-10 minh-10 w-10 h-10 rounded-md">
+                        <img
+                          className="w-full h-full"
+                          src={item?.image_url}
+                          alt="logo"
+                        />
+                      </div>
+                      <div className="font-semibold "> {item.title}</div>
+                    </div>
+                  </td>
                   <td className="border px-4 py-3 text-blue-600 underline">
                     <a
                       href={item.link}
@@ -303,21 +284,8 @@ const App = () => {
                     </a>
                   </td>
                   <td
-                    className="border px-4 py-3"
-                    dangerouslySetInnerHTML={{ __html: item.htmlTitle }}
-                  ></td>
-                  <td className="border px-4 py-3 text-blue-600 underline">
-                    <a
-                      href={item.displayLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {item.displayLink}
-                    </a>
-                  </td>
-                  <td
-                    className="border px-4 py-3"
-                    dangerouslySetInnerHTML={{ __html: item.htmlSnippet }}
+                    className="border px-4 py-3 "
+                    dangerouslySetInnerHTML={{ __html: item.snippet }}
                   ></td>
                 </tr>
               ))}
