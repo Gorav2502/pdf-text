@@ -1,4 +1,6 @@
-import React, { useRef, useState } from "react";
+import axios from "axios";
+import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 const data = [
   {
     id: 1,
@@ -107,6 +109,28 @@ const App = () => {
   const [query, setQuery] = useState(localStorage.getItem("query") || "");
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  const [apiData, setApiData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Define the async function inside useEffect
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://stagingapi.jivahire.com/api/results/"
+        );
+        setApiData(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+  console.log(apiData);
   const handleCheckboxChange = (id) => {
     setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -121,33 +145,38 @@ const App = () => {
     }
     setSelectAll(!selectAll);
   };
-  const handleStartOrStop = () => {
+
+  const handleStartOrStop = async () => {
     const formData = {
       cmd: !isOn ? "start" : "stop",
       query: query,
     };
-    console.log(formData);
-    // agent(formData).then((res) => {
-    //   if (res?.error) {
-    //     toast.error(res?.error?.data?.error);
-    //   } else {
-    //     if (res?.data?.success) {
-    //       toast.success(res?.data?.message);
-    //       localStorage.setItem("git_status", res?.data?.status);
-    //       localStorage.setItem("query", query);
-    //     } else {
-    //       toast.success(res?.data?.message);
-    //       localStorage.setItem("git_status", res?.data?.status);
-    //     }
-    //   }
-    // });
+
+    console.log("Sending Data:", formData);
+
+    try {
+      const response = await axios.post(
+        "https://your-api-endpoint.com/action",
+        formData
+      );
+
+      if (response?.data?.success) {
+        toast.success(response?.data?.message);
+        localStorage.setItem("git_status", response?.data?.status);
+        localStorage.setItem("query", query);
+      } else {
+        toast.error(response?.data?.message || "An error occurred");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Network error");
+    }
   };
   return (
     <div className=" p-4 text-sm font-sans">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-900 to-cyan-500 text-white p-5 rounded-lg shadow-lg flex justify-between items-center">
         <h1 className="text-lg font-bold tracking-wide">
-          🌟 Modern Data Table
+          🌟 Lead Generation Agent
         </h1>
         <div className="relative">
           {/* Status Indicator */}
@@ -204,10 +233,11 @@ const App = () => {
               </div>
 
               {/* Query Input */}
-              <input
+              <textarea
+                rows={5}
                 value={query || ""}
                 type="text"
-                placeholder="Enter your query"
+                placeholder="Enter Project / POC details"
                 className="border outline-none px-3 py-2 w-full h-10 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-400"
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -216,77 +246,85 @@ const App = () => {
         </div>
       </div>
       {/* Table Section */}
-      <div className="overflow-x-auto py-6">
-        <div className="flex justify-end ">
-          {" "}
-          <button
-            disabled={selectedItems?.length <= 0}
-            className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
-          >
-            Send Email
-          </button>
-        </div>
-        <table className="w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
-          <thead className="bg-gradient-to-r from-gray-800 to-gray-600 text-white uppercase text-xs  tracking-wide shadow-md">
-            <tr>
-              <th className="border px-4 py-3 text-center w-[110px]">
-                {" "}
-                <button onClick={handleSelectAll} className="">
-                  {selectAll ? "Unselect All" : "Select All"}
-                </button>
-              </th>
-              <th className="border px-4 py-3 text-left">ID</th>
-              <th className="border px-4 py-3 text-left">Title</th>
-              <th className="border px-4 py-3 text-left">Link</th>
-              <th className="border px-4 py-3 text-left">HTML Title</th>
-              <th className="border px-4 py-3 text-left">Display Link</th>
-              <th className="border px-4 py-3 text-left ">htmlSnippet</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, index) => (
-              <tr
-                key={item.id}
-                className={`${
-                  index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
-                } hover:bg-cyan-100 transition-colors `}
-              >
-                <td className="border px-4 py-3 text-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedItems.includes(item.id)}
-                    onChange={() => handleCheckboxChange(item.id)}
-                  />
-                </td>
-                <td className="border px-4 py-3">{item.id}</td>
-                <td className="border px-4 py-3">{item.title}</td>
-                <td className="border px-4 py-3 text-blue-600 underline">
-                  <a href={item.link} target="_blank" rel="noopener noreferrer">
-                    {item.link}
-                  </a>
-                </td>
-                <td
-                  className="border px-4 py-3"
-                  dangerouslySetInnerHTML={{ __html: item.htmlTitle }}
-                ></td>
-                <td className="border px-4 py-3 text-blue-600 underline">
-                  <a
-                    href={item.displayLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {item.displayLink}
-                  </a>
-                </td>
-                <td
-                  className="border px-4 py-3"
-                  dangerouslySetInnerHTML={{ __html: item.htmlSnippet }}
-                ></td>
+      {loading ? (
+        "Loading..."
+      ) : (
+        <div className="overflow-x-auto py-6">
+          <div className="flex justify-end ">
+            {" "}
+            <button
+              disabled={selectedItems?.length <= 0}
+              className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
+            >
+              Send Email
+            </button>
+          </div>
+          <table className="w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+            <thead className="bg-gradient-to-r from-gray-800 to-gray-600 text-white uppercase text-xs  tracking-wide shadow-md">
+              <tr>
+                <th className="border px-4 py-3 text-center w-[110px]">
+                  {" "}
+                  <button onClick={handleSelectAll} className="">
+                    {selectAll ? "Unselect All" : "Select All"}
+                  </button>
+                </th>
+                <th className="border px-4 py-3 text-left">ID</th>
+                <th className="border px-4 py-3 text-left">Title</th>
+                <th className="border px-4 py-3 text-left">Link</th>
+                <th className="border px-4 py-3 text-left">HTML Title</th>
+                <th className="border px-4 py-3 text-left">Display Link</th>
+                <th className="border px-4 py-3 text-left ">htmlSnippet</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr
+                  key={item.id}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
+                  } hover:bg-cyan-100 transition-colors `}
+                >
+                  <td className="border px-4 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.id)}
+                      onChange={() => handleCheckboxChange(item.id)}
+                    />
+                  </td>
+                  <td className="border px-4 py-3">{item.id}</td>
+                  <td className="border px-4 py-3">{item.title}</td>
+                  <td className="border px-4 py-3 text-blue-600 underline">
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.link}
+                    </a>
+                  </td>
+                  <td
+                    className="border px-4 py-3"
+                    dangerouslySetInnerHTML={{ __html: item.htmlTitle }}
+                  ></td>
+                  <td className="border px-4 py-3 text-blue-600 underline">
+                    <a
+                      href={item.displayLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.displayLink}
+                    </a>
+                  </td>
+                  <td
+                    className="border px-4 py-3"
+                    dangerouslySetInnerHTML={{ __html: item.htmlSnippet }}
+                  ></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };
