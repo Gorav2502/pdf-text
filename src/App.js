@@ -1,583 +1,294 @@
-// // import React, { useState } from "react";
-// // import * as pdfjsLib from "pdfjs-dist";
-// // import mammoth from "mammoth";
+import React, { useRef, useState } from "react";
+const data = [
+  {
+    id: 1,
+    title: "Bret Foudray - Premier Automotive | LinkedIn",
+    link: "https://www.linkedin.com/in/bret-foudray-9b246632",
+    htmlTitle: "Bret Foudray - Premier <b>Automotive</b> | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "Premier <b>Automotive</b> - WP Carey School of Business â€“ Arizona State University About I have built a successful and well-rounded <b>automotive</b> career taking bad&nbsp;...",
+  },
+  {
+    id: 2,
+    title: "Jeremiah Weaver - COO and General Manager - Automotive ...",
+    link: "https://www.linkedin.com/in/jeremiah-weaver-56663299",
+    htmlTitle:
+      "Jeremiah Weaver - <b>COO</b> and General Manager - <b>Automotive</b> ...",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "... <b>Automotive</b> Designs and Fabrication, I work to lead our motivated and skilled ... Experience. <b>Automotive</b> Designs &amp;amp; Fabrication Graphic. <b>COO</b> and General Manager.",
+  },
+  {
+    id: 3,
+    title: "Terry L Karges Sr - Petersen Automotive Museum | LinkedIn",
+    link: "https://www.linkedin.com/in/terry-l-karges-sr-64029415",
+    htmlTitle:
+      "Terry L Karges Sr - Petersen <b>Automotive</b> Museum | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "Dec 8, 2016 <b>...</b> Experience: Petersen <b>Automotive</b> Museum Â· Location: Los Angeles Â· 500+ connections on LinkedIn. View Terry L Karges Sr&#39;s profile on LinkedIn,&nbsp;...",
+  },
+  {
+    id: 4,
+    title: "John Cavanaugh - CFO - Automotive Credit Corp | LinkedIn",
+    link: "https://www.linkedin.com/in/john-cavanaugh-896b87a",
+    htmlTitle:
+      "John Cavanaugh - <b>CFO</b> - <b>Automotive</b> Credit Corp | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "<b>CFO</b> at <b>Automotive</b> Credit Corp Â· Experience: <b>Automotive</b> Credit Corp Â· Location: Northville Â· 500+ connections on LinkedIn. View John Cavanaugh&#39;s profile on&nbsp;...",
+  },
+  {
+    id: 5,
+    title: "John Bozzella - Alliance For Automotive Innovation | LinkedIn",
+    link: "https://www.linkedin.com/in/john-bozzella",
+    htmlTitle:
+      "John Bozzella - Alliance For <b>Automotive</b> Innovation | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "John Bozzella, a veteran auto industry <b>executive</b> and policy leader, is the president andâ€¦ Â· Experience: Alliance For <b>Automotive</b> Innovation Â· Education:&nbsp;...",
+  },
+  {
+    id: 6,
+    title: "Lubomir Stanislavov - CEO - Automotive Cluster Bulgaria | LinkedIn",
+    link: "https://bg.linkedin.com/in/lubomir-stanislavov-7313b611",
+    htmlTitle:
+      "Lubomir Stanislavov - <b>CEO</b> - <b>Automotive</b> Cluster Bulgaria | LinkedIn",
+    displayLink: "bg.linkedin.com",
+    htmlSnippet:
+      "<b>CEO</b> at <b>Automotive</b> Cluster Bulgaria Â· Experience: <b>Automotive</b> Cluster Bulgaria Â· Education: University of Architecture, Civil Engineering and Geodesy, Sofia,&nbsp;...",
+  },
+  {
+    id: 7,
+    title: "Scott LeTourneau - Cox Automotive Inc. | LinkedIn",
+    link: "https://www.linkedin.com/in/sletourneau",
+    htmlTitle: "Scott LeTourneau - Cox <b>Automotive</b> Inc. | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "Specialties: Corporate strategy, mergers, acquisitions, divestitures, strategicâ€¦ Â· Experience: Cox <b>Automotive</b> Inc. Â· Education: University of Virginia&nbsp;...",
+  },
+  {
+    id: 8,
+    title: "Judy Curran - ANSYS, Inc. | LinkedIn",
+    link: "https://www.linkedin.com/in/judycurran",
+    htmlTitle: "Judy Curran - ANSYS, Inc. | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "<b>Executive</b> Board Member. Inforum <b>Automotive</b> Next. Oct 2014 - Oct 2017 3 years 1 month. Patents. Air fuel ratio feedback control. Issued November 1, 1994 US&nbsp;...",
+  },
+  {
+    id: 9,
+    title: "Logan Pitts - AGS Company Automotive Solutions | LinkedIn",
+    link: "https://www.linkedin.com/in/logan-pitts-5598697",
+    htmlTitle:
+      "nLogan Pitts - AGS Company <b>Automotive</b> Solutions | LinkedIn",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "Experience: AGS Company <b>Automotive</b> Solutions Â· Location: Muskegon Â· 443 connections on LinkedIn. View Logan Pitts&#39; profile on LinkedIn, a professional&nbsp;...",
+  },
+  {
+    id: 10,
+    title: "Ben Burton - Executive General Manager - Dick Smith Automotive ...",
+    link: "https://www.linkedin.com/in/brian-mcculley-72596920",
+    htmlTitle:
+      "Ben Burton - <b>Executive</b> General Manager - Dick Smith <b>Automotive</b> ...",
+    displayLink: "www.linkedin.com",
+    htmlSnippet:
+      "<b>Executive</b> Manager: Flow Audi of Winston-Salem, Flow Acura of Winston-Salem ... <b>Automotive</b> Companies Â· Education: Duke University Â· Location: Winston&nbsp;...",
+  },
+];
+const App = () => {
+  const gitAgentbuttonref = useRef(null);
+  const switchValue =
+    localStorage.getItem("git_status") === "Running" ? true : false;
+  const [gitAgentShow, setGitAgentShow] = useState(false);
+  const [isOn, setIsOn] = useState(switchValue || false);
+  const [query, setQuery] = useState(localStorage.getItem("query") || "");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const handleCheckboxChange = (id) => {
+    setSelectedItems((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
-// // pdfjsLib.GlobalWorkerOptions.workerSrc = `http://localhost:3001/pdf.worker.min.js`;
-// // function App() {
-// //   const [text, setText] = useState("");
-// //   console.log(`PDF.js Version: ${pdfjsLib.version}`);
-// //   const handleFileChange = (file) => {
-// //     if (file.type === "application/pdf") {
-// //       extractPDFText(file);
-// //     } else if (file.name.endsWith(".docx")) {
-// //       extractDocxText(file);
-// //     } else {
-// //       setText("Unsupported file type.");
-// //     }
-// //   };
-
-// //   const extractPDFText = async (file) => {
-// //     const fileReader = new FileReader();
-// //     fileReader.onload = async (e) => {
-// //       const typedArray = new Uint8Array(e.target.result);
-// //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
-// //       let fullText = "";
-
-// //       for (let i = 1; i <= pdf.numPages; i++) {
-// //         const page = await pdf.getPage(i);
-// //         const textContent = await page.getTextContent();
-// //         const pageText = textContent.items.map((item) => item.str).join(" ");
-// //         fullText += `\n${pageText}`;
-// //       }
-// //       setText(fullText);
-// //     };
-// //     fileReader.readAsArrayBuffer(file);
-// //   };
-
-// //   const extractDocxText = async (file) => {
-// //     const fileReader = new FileReader();
-// //     fileReader.onload = async (e) => {
-// //       const arrayBuffer = e.target.result;
-// //       const result = await mammoth.extractRawText({ arrayBuffer });
-// //       setText(result.value);
-// //     };
-// //     fileReader.readAsArrayBuffer(file);
-// //   };
-
-// //   return (
-// //     <div>
-// //       <input
-// //         type="file"
-// //         accept=".pdf,.docx"
-// //         onChange={(e) => handleFileChange(e.target.files[0])}
-// //       />
-// //       <div style={{ width: "80%", marginLeft: "30px" }}>
-// //         <textarea
-// //           value={text}
-// //           readOnly
-// //           rows={50}
-// //           style={{ width: "100%", marginTop: "20px" }}
-// //         />
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // export default App;
-
-// import React, { useState } from "react";
-// import * as pdfjsLib from "pdfjs-dist";
-// import mammoth from "mammoth";
-// import "./index.css";
-// // Use the local worker script from the public folder
-// pdfjsLib.GlobalWorkerOptions.workerSrc = `https://pdf-text-mith.vercel.app/pdf.worker.min.js`;
-
-// function App() {
-//   const [text, setText] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-
-//   const handleFileChange = (file) => {
-//     if (!file) {
-//       return;
-//     }
-//     setError(""); // Reset previous errors
-//     setLoading(true); // Start loading state
-
-//     if (file.type === "application/pdf") {
-//       extractPDFText(file);
-//     } else if (file.name.endsWith(".docx")) {
-//       extractDocxText(file);
-//     } else {
-//       setError("Unsupported file type. Please upload a PDF or DOCX file.");
-//       setLoading(false);
-//     }
-//   };
-
-//   // New function to extract emails and phone numbers
-//   // const extractPDFText = async (file) => {
-//   //   try {
-//   //     const fileReader = new FileReader();
-//   //     fileReader.onload = async (e) => {
-//   //       const typedArray = new Uint8Array(e.target.result);
-//   //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
-//   //       let fullText = "";
-
-//   //       for (let i = 1; i <= pdf.numPages; i++) {
-//   //         const page = await pdf.getPage(i);
-//   //         const textContent = await page.getTextContent();
-//   //         const items = textContent.items;
-
-//   //         // Use a regular for loop to avoid unsafe references
-//   //         for (let j = 0; j < items.length; j++) {
-//   //           const { str, transform } = items[j];
-//   //           const yPosition = transform[5];
-//   //           if (yPosition > 700) {
-//   //             fullText += `${str} `; // Header
-//   //           } else if (yPosition < 50) {
-//   //             fullText += `${str} `; // Footer
-//   //           } else {
-//   //             fullText += `${str} `; // Main body text
-//   //           }
-//   //         }
-//   //       }
-
-//   //       const spacedText = fullText
-//   //         .trim()
-//   //         .split(" ")
-//   //         .map((word) => `${word} `) // Add a space after every word
-//   //         .join("");
-
-//   //       setText(spacedText.trim()); // Update state with processed text
-//   //     };
-//   //     fileReader.readAsArrayBuffer(file);
-//   //   } catch (error) {
-//   //     console.error("Error extracting PDF text:", error);
-//   //   } finally {
-//   //     setLoading(false); // End loading state
-//   //   }
-//   // };
-//   // const extractPDFText = async (file) => {
-//   //   try {
-//   //     const fileReader = new FileReader();
-//   //     fileReader.onload = async (e) => {
-//   //       const typedArray = new Uint8Array(e.target.result);
-//   //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
-
-//   //       let extractedText = "";
-//   //       let previousYPosition = null;
-//   //       const sectionThreshold = 100; // Threshold to detect breaks between sections or paragraphs
-//   //       const lineBreakThreshold = 5; // Threshold to detect new lines (based on Y-position difference)
-//   //       let currentPageText = "";
-
-//   //       // Loop through all pages of the PDF
-//   //       for (let i = 1; i <= pdf.numPages; i++) {
-//   //         const page = await pdf.getPage(i);
-//   //         const textContent = await page.getTextContent();
-//   //         const items = textContent.items;
-
-//   //         // Loop through all items (text fragments) on the page
-//   //         for (let j = 0; j < items.length; j++) {
-//   //           const { str, transform } = items[j];
-//   //           const yPosition = transform[5]; // Extract the Y position for text placement
-
-//   //           // Detect new lines based on Y position difference
-//   //           if (
-//   //             previousYPosition &&
-//   //             Math.abs(previousYPosition - yPosition) > lineBreakThreshold
-//   //           ) {
-//   //             currentPageText += "\n"; // Add line break if the Y position differs significantly
-//   //           }
-
-//   //           currentPageText += `${str} `; // Add the current text fragment
-//   //           previousYPosition = yPosition; // Update the Y position for comparison
-//   //         }
-
-//   //         // Once we finish processing the page, add the page text to the full extracted text
-//   //         extractedText += currentPageText.trim() + "\n\n"; // Ensure there's a space between pages
-//   //         currentPageText = ""; // Reset for next page text
-//   //       }
-
-//   //       // Remove trailing spaces and unnecessary line breaks
-//   //       extractedText = extractedText.trim();
-
-//   //       // Update state with the extracted text, preserving its structure
-//   //       setText(extractedText);
-//   //     };
-
-//   //     fileReader.readAsArrayBuffer(file);
-//   //   } catch (error) {
-//   //     console.error("Error extracting PDF text:", error);
-//   //   } finally {
-//   //     setLoading(false); // End loading state
-//   //   }
-//   // };
-
-//   const extractPDFText = async (file) => {
-//     try {
-//       const fileReader = new FileReader();
-//       fileReader.onload = async (e) => {
-//         const typedArray = new Uint8Array(e.target.result);
-//         const pdf = await pdfjsLib.getDocument(typedArray).promise;
-
-//         let extractedText = "";
-
-//         for (let i = 1; i <= pdf.numPages; i++) {
-//           const page = await pdf.getPage(i);
-//           const textContent = await page.getTextContent();
-//           const items = textContent.items;
-
-//           // Group text fragments by their approximate line (Y position)
-//           const lines = [];
-//           const lineMap = new Map();
-
-//           items.forEach(({ str, transform }) => {
-//             const yPosition = Math.round(transform[5]); // Round Y position for easier grouping
-//             if (!lineMap.has(yPosition)) {
-//               lineMap.set(yPosition, []);
-//             }
-//             lineMap.get(yPosition).push({ str, xPosition: transform[4] }); // Collect text fragments and their X positions
-//           });
-
-//           // Sort lines by Y position (descending to match natural top-to-bottom reading order)
-//           const sortedLines = Array.from(lineMap.entries()).sort(
-//             (a, b) => b[0] - a[0]
-//           );
-
-//           // Process each line
-//           sortedLines.forEach(([_, fragments]) => {
-//             // Sort fragments in the line by X position (left to right)
-//             fragments.sort((a, b) => a.xPosition - b.xPosition);
-
-//             // Combine all fragments in the line into a single line of text
-//             const lineText = fragments.map((f) => f.str).join(" ");
-//             lines.push(lineText);
-//           });
-
-//           // Combine lines into the page's text
-//           extractedText += lines.join("\n") + "\n\n"; // Add double line break between pages
-//         }
-
-//         // Remove trailing spaces and unnecessary breaks
-//         extractedText = extractedText.trim();
-
-//         // Update the extracted text to the state (or process it as needed)
-//         setText(extractedText);
-//       };
-
-//       fileReader.readAsArrayBuffer(file);
-//     } catch (error) {
-//       console.error("Error extracting PDF text:", error);
-//     } finally {
-//       setLoading(false); // End loading state
-//     }
-//   };
-
-//   const extractDocxText = async (file) => {
-//     try {
-//       const fileReader = new FileReader();
-//       fileReader.onload = async (e) => {
-//         const arrayBuffer = e.target.result;
-//         const result = await mammoth.extractRawText({ arrayBuffer });
-//         setText(result.value);
-//       };
-//       fileReader.readAsArrayBuffer(file);
-//     } catch (error) {
-//       setError("An error occurred while extracting DOCX text.");
-//       console.error("Error extracting DOCX text:", error);
-//     } finally {
-//       setLoading(false); // End loading state
-//     }
-//   };
-//   const highlightEmails = (text) => {
-//     const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
-//     return text.split(emailRegex).map((part, index) => {
-//       if (emailRegex.test(part)) {
-//         return (
-//           <span key={index} style={{ color: "blue", fontWeight: "bold" }}>
-//             {part}
-//           </span>
-//         ); // Highlight email
-//       }
-//       return part; // Return other parts as plain text
-//     });
-//   };
-//   return (
-//     <div>
-//       <div className="flex  p-4 ">
-//         <input
-//           type="file"
-//           accept=".pdf,.docx"
-//           onChange={(e) => handleFileChange(e.target.files[0])}
-//           className="cursor-pointer"
-//         />
-//       </div>
-//       <div className="px-4">
-//         {loading ? (
-//           <p>Processing...</p>
-//         ) : (
-//           <div className="grid grid-cols-2  gap-4">
-//             {/* <div className="border text-xs   leading-6 p-4 ">
-//               <span className=""> {highlightEmails(text)}</span>
-//             </div> */}
-//             <div>
-//               <textarea
-//                 className="w-full text-xs h-full"
-//                 value={text}
-//                 readOnly
-//                 rows={50}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {error && (
-//           <div style={{ color: "red", marginTop: "10px" }}>
-//             <strong>{error}</strong>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
-import React, { useState, useEffect } from "react";
-import * as pdfjsLib from "pdfjs-dist";
-import mammoth from "mammoth";
-import "./index.css";
-
-// Use the local worker script from the public folder
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://pdf-text-mith.vercel.app/pdf.worker.min.js`;
-
-function App() {
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [pdfUrl, setPdfUrl] = useState(null); // State for the PDF URL
-  const [pdfPageNumber, setPdfPageNumber] = useState(1); // Page tracking for PDF
-  const [isPdfFile, setIsPdfFile] = useState(false); // Flag to identify PDF
-
-  const handleFileChange = (file) => {
-    if (!file) {
-      return;
-    }
-    setError(""); // Reset previous errors
-    setLoading(true); // Start loading state
-    setPdfUrl(null); // Reset PDF URL
-    setText(""); // Reset the text
-
-    if (file.type === "application/pdf") {
-      setIsPdfFile(true); // It's a PDF file
-      setPdfUrl(URL.createObjectURL(file)); // Set the PDF file URL
-      extractPDFText(file); // Extract text from PDF
-    } else if (file.name.endsWith(".docx")) {
-      setIsPdfFile(false); // It's a DOCX file
-      extractDocxText(file); // Extract text from DOCX
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedItems([]);
     } else {
-      setError("Unsupported file type. Please upload a PDF or DOCX file.");
-      setLoading(false);
+      setSelectedItems(data.map((item) => item.id));
     }
+    setSelectAll(!selectAll);
   };
-
-  // const extractPDFText = async (file) => {
-  //   try {
-  //     const fileReader = new FileReader();
-
-  //     fileReader.onload = async (e) => {
-  //       const typedArray = new Uint8Array(e.target.result);
-  //       const pdf = await pdfjsLib.getDocument(typedArray).promise;
-  //       let extractedText = "";
-
-  //       for (let i = 1; i <= pdf.numPages; i++) {
-  //         const page = await pdf.getPage(i);
-  //         const textContent = await page.getTextContent();
-  //         const items = textContent.items;
-
-  //         // Group text fragments by their approximate line (Y position)
-  //         const lines = [];
-  //         const lineMap = new Map();
-
-  //         items.forEach(({ str, transform }) => {
-  //           const yPosition = Math.round(transform[5]); // Round Y position for easier grouping
-  //           if (!lineMap.has(yPosition)) {
-  //             lineMap.set(yPosition, []);
-  //           }
-  //           lineMap.get(yPosition).push({ str, xPosition: transform[4] }); // Collect text fragments and their X positions
-  //         });
-
-  //         // Sort lines by Y position (descending to match natural top-to-bottom reading order)
-  //         const sortedLines = Array.from(lineMap.entries()).sort(
-  //           (a, b) => b[0] - a[0]
-  //         );
-
-  //         // Process each line, ensuring text is not mixed
-  //         sortedLines.forEach(([_, fragments]) => {
-  //           // Sort fragments in the line by X position (left to right)
-  //           fragments.sort((a, b) => a.xPosition - b.xPosition);
-
-  //           // Combine all fragments in the line into a single line of text
-  //           const lineText = fragments.map((f) => f.str).join(" ");
-  //           lines.push(lineText);
-  //         });
-
-  //         // Combine lines into the page's text, maintaining separation between pages
-  //         extractedText += lines.join("\n") + "\n\n"; // Add double line break between pages
-  //       }
-
-  //       // Remove trailing spaces and unnecessary breaks
-  //       extractedText = extractedText.trim();
-
-  //       // Set the extracted text to state or process it as needed
-  //       setText(extractedText); // Use your state update function
-  //     };
-
-  //     fileReader.readAsArrayBuffer(file);
-  //   } catch (error) {
-  //     console.error("Error extracting PDF text:", error);
-  //   } finally {
-  //     setLoading(false); // End loading state
-  //   }
-  // };
-
-  const extractPDFText = async (file) => {
-    try {
-      const fileReader = new FileReader();
-
-      fileReader.onload = async (e) => {
-        const typedArray = new Uint8Array(e.target.result);
-        const pdf = await pdfjsLib.getDocument(typedArray).promise;
-        let extractedText = "";
-        let currentSection = ""; // To hold text for the current section
-
-        const sectionThreshold = 50; // Threshold for large vertical gaps (e.g., 50px between text fragments)
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const items = textContent.items;
-
-          let lastY = null; // Variable to keep track of the last Y position
-          let newSection = false; // Flag to detect new section
-
-          // Group text by detecting large vertical gaps
-          items.forEach(({ str, transform, width, height }) => {
-            const yPosition = Math.round(transform[5]); // Vertical position of the text
-
-            if (lastY !== null) {
-              const gap = Math.abs(lastY - yPosition); // Calculate the gap between two lines
-
-              if (gap > sectionThreshold) {
-                // If the gap is greater than the threshold, treat it as a new section
-                newSection = true;
-              }
-            }
-
-            // If it's a new section, add the previous section's content to the extracted text
-            if (newSection) {
-              extractedText += currentSection + "\n\n"; // Add previous section and clear it for the next one
-              currentSection = ""; // Reset for the next section
-              newSection = false; // Reset new section flag
-            }
-
-            // Append the current text to the section content
-            currentSection += str + " "; // Add space between words
-
-            lastY = yPosition; // Update the last Y position
-          });
-
-          // Append the last section content after processing all items
-          extractedText += currentSection + "\n\n";
-        }
-
-        // Clean up and update state with the extracted text
-        extractedText = extractedText.trim();
-        setText(extractedText); // Your state update function
-      };
-
-      fileReader.readAsArrayBuffer(file);
-    } catch (error) {
-      console.error("Error extracting PDF text with sections:", error);
-    } finally {
-      setLoading(false); // End loading state
-    }
+  const handleStartOrStop = () => {
+    const formData = {
+      cmd: !isOn ? "start" : "stop",
+      query: query,
+    };
+    console.log(formData);
+    // agent(formData).then((res) => {
+    //   if (res?.error) {
+    //     toast.error(res?.error?.data?.error);
+    //   } else {
+    //     if (res?.data?.success) {
+    //       toast.success(res?.data?.message);
+    //       localStorage.setItem("git_status", res?.data?.status);
+    //       localStorage.setItem("query", query);
+    //     } else {
+    //       toast.success(res?.data?.message);
+    //       localStorage.setItem("git_status", res?.data?.status);
+    //     }
+    //   }
+    // });
   };
-
-  // Example helper function to check if text is near a border (you can adjust this as per your needs)
-  const checkIfNearBorder = (x, y, width, height) => {
-    // Define a threshold to check if the text is near the left, right, top, or bottom border
-    const borderThreshold = 5; // Change this value as needed
-
-    const isNearVerticalBorder =
-      x <= borderThreshold || x + width >= window.innerWidth - borderThreshold;
-    const isNearHorizontalBorder =
-      y <= borderThreshold ||
-      y + height >= window.innerHeight - borderThreshold;
-
-    return isNearVerticalBorder || isNearHorizontalBorder;
-  };
-
-  const extractDocxText = async (file) => {
-    try {
-      const fileReader = new FileReader();
-      fileReader.onload = async (e) => {
-        const arrayBuffer = e.target.result;
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        setText(result.value);
-      };
-      fileReader.readAsArrayBuffer(file);
-    } catch (error) {
-      setError("An error occurred while extracting DOCX text.");
-      console.error("Error extracting DOCX text:", error);
-    } finally {
-      setLoading(false); // End loading state
-    }
-  };
-
-  const handleNextPage = () => {
-    setPdfPageNumber((prevPage) => prevPage + 1);
-  };
-
-  const handlePrevPage = () => {
-    setPdfPageNumber((prevPage) => Math.max(1, prevPage - 1));
-  };
-
   return (
-    <div>
-      <div className="flex p-4">
-        <input
-          type="file"
-          accept=".pdf,.docx"
-          onChange={(e) => handleFileChange(e.target.files[0])}
-          className="cursor-pointer"
-        />
-      </div>
-      <div className="px-4">
-        {loading ? (
-          <p>Processing...</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-4">
-            {/* PDF Preview */}
-            <div>
-              <textarea
-                className="w-full text-xs h-full"
-                value={text}
-                readOnly
-                rows={40}
-              />
-            </div>
-            {pdfUrl && (
-              <div className="border p-4">
-                <iframe
-                  src={pdfUrl}
-                  width="100%"
-                  height="100%"
-                  title="PDF Preview"
-                ></iframe>
-                <div className="flex justify-between mt-2">
+    <div className=" p-4 text-sm font-sans">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-900 to-cyan-500 text-white p-5 rounded-lg shadow-lg flex justify-between items-center">
+        <h1 className="text-lg font-bold tracking-wide">
+          🌟 Modern Data Table
+        </h1>
+        <div className="relative">
+          {/* Status Indicator */}
+          <div
+            className={`w-3 h-3 rounded-full absolute right-0 top-0 transform translate-x-1 -translate-y-1 ${
+              isOn ? "bg-green-400" : "bg-red-500"
+            }`}
+          ></div>
+
+          {/* Git Agent Button */}
+          <div
+            onClick={() => setGitAgentShow(!gitAgentShow)}
+            className="uppercase bg-white text-blue-600 select-none cursor-pointer text-xs font-semibold border rounded-full w-8 h-8 flex justify-center items-center shadow-md hover:bg-gray-200 transition-all"
+          >
+            GA
+          </div>
+
+          {/* Git Agent Dropdown */}
+          {gitAgentShow && (
+            <div
+              ref={gitAgentbuttonref}
+              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 w-80 font-inter flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">
+                  {localStorage.getItem("git_status") || "Stopped"}
+                </span>
+                {/* Toggle Switch */}
+                <div className="flex items-center space-x-2">
                   <button
-                    onClick={handlePrevPage}
-                    disabled={pdfPageNumber <= 1}
+                    disabled={!query}
+                    onClick={() => {
+                      setIsOn(!isOn);
+                      handleStartOrStop();
+                    }}
+                    className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                      isOn ? "bg-green-400" : "bg-gray-300"
+                    }`}
                   >
-                    Previous Page
+                    <span
+                      className={`absolute left-1 top-1 w-4 h-4 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
+                        isOn ? "translate-x-6" : "translate-x-0"
+                      }`}
+                    ></span>
                   </button>
-                  <button onClick={handleNextPage}>Next Page</button>
+                  <span
+                    className={`text-sm font-semibold ${
+                      isOn ? "text-gray-800" : "text-gray-400"
+                    }`}
+                  >
+                    {isOn ? "ON" : "OFF"}
+                  </span>
                 </div>
               </div>
-            )}
 
-            {/* DOCX Preview */}
-          </div>
-        )}
-
-        {error && (
-          <div style={{ color: "red", marginTop: "10px" }}>
-            <strong>{error}</strong>
-          </div>
-        )}
+              {/* Query Input */}
+              <input
+                value={query || ""}
+                type="text"
+                placeholder="Enter your query"
+                className="border outline-none px-3 py-2 w-full h-10 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-400"
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Table Section */}
+      <div className="overflow-x-auto py-6">
+        <div className="flex justify-end ">
+          {" "}
+          <button
+            disabled={selectedItems?.length <= 0}
+            className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
+          >
+            Send Email
+          </button>
+        </div>
+        <table className="w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-gradient-to-r from-gray-800 to-gray-600 text-white uppercase text-xs  tracking-wide shadow-md">
+            <tr>
+              <th className="border px-4 py-3 text-center w-[110px]">
+                {" "}
+                <button onClick={handleSelectAll} className="">
+                  {selectAll ? "Unselect All" : "Select All"}
+                </button>
+              </th>
+              <th className="border px-4 py-3 text-left">ID</th>
+              <th className="border px-4 py-3 text-left">Title</th>
+              <th className="border px-4 py-3 text-left">Link</th>
+              <th className="border px-4 py-3 text-left">HTML Title</th>
+              <th className="border px-4 py-3 text-left">Display Link</th>
+              <th className="border px-4 py-3 text-left ">htmlSnippet</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, index) => (
+              <tr
+                key={item.id}
+                className={`${
+                  index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
+                } hover:bg-cyan-100 transition-colors `}
+              >
+                <td className="border px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item.id)}
+                    onChange={() => handleCheckboxChange(item.id)}
+                  />
+                </td>
+                <td className="border px-4 py-3">{item.id}</td>
+                <td className="border px-4 py-3">{item.title}</td>
+                <td className="border px-4 py-3 text-blue-600 underline">
+                  <a href={item.link} target="_blank" rel="noopener noreferrer">
+                    {item.link}
+                  </a>
+                </td>
+                <td
+                  className="border px-4 py-3"
+                  dangerouslySetInnerHTML={{ __html: item.htmlTitle }}
+                ></td>
+                <td className="border px-4 py-3 text-blue-600 underline">
+                  <a
+                    href={item.displayLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {item.displayLink}
+                  </a>
+                </td>
+                <td
+                  className="border px-4 py-3"
+                  dangerouslySetInnerHTML={{ __html: item.htmlSnippet }}
+                ></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-}
+};
 
 export default App;
