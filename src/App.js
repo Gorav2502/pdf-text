@@ -198,19 +198,24 @@ const App = () => {
           {gitAgentShow && (
             <div
               ref={gitAgentbuttonref}
-              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 w-80 font-inter flex flex-col gap-2"
+              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 h-40 w-80 font-inter flex flex-col gap-2"
             >
               {/* Query Input */}
               <div>Input Query</div>
               <textarea
-                rows={5}
+                rows={10}
                 value={query || ""}
                 type="text"
                 placeholder="Enter Project / POC details"
                 className="border outline-none px-3 py-2 w-full h-10 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-400"
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <button className="bg-blue-400 text-white px-4 py-2 rounded-lg" onClick={() => handleStartOrStop()}>Search Query</button>
+              <button
+                className="bg-blue-400 text-white px-4 py-2 rounded-lg"
+                onClick={() => handleStartOrStop()}
+              >
+                Search Query
+              </button>
             </div>
           )}
         </div>
