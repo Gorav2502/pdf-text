@@ -160,7 +160,7 @@ const App = () => {
         formData
       );
 
-      if (response?.data?.message === "Successful") {
+      if (response?.data?.success) {
         toast.success(response?.data?.message);
         localStorage.setItem("git_status", response?.data?.status);
         localStorage.setItem("query", query);
@@ -213,7 +213,7 @@ const App = () => {
               <button
                 className="bg-blue-400 text-white px-4 py-2 rounded-lg"
                 onClick={() => handleStartOrStop()}
-                disabled ={!query}
+                disabled={!query}
               >
                 Search Query
               </button>
