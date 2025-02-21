@@ -1,105 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-const data = [
-  {
-    id: 1,
-    title: "Bret Foudray - Premier Automotive | LinkedIn",
-    link: "https://www.linkedin.com/in/bret-foudray-9b246632",
-    htmlTitle: "Bret Foudray - Premier <b>Automotive</b> | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "Premier <b>Automotive</b> - WP Carey School of Business â€“ Arizona State University About I have built a successful and well-rounded <b>automotive</b> career taking bad&nbsp;...",
-  },
-  {
-    id: 2,
-    title: "Jeremiah Weaver - COO and General Manager - Automotive ...",
-    link: "https://www.linkedin.com/in/jeremiah-weaver-56663299",
-    htmlTitle:
-      "Jeremiah Weaver - <b>COO</b> and General Manager - <b>Automotive</b> ...",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "... <b>Automotive</b> Designs and Fabrication, I work to lead our motivated and skilled ... Experience. <b>Automotive</b> Designs &amp;amp; Fabrication Graphic. <b>COO</b> and General Manager.",
-  },
-  {
-    id: 3,
-    title: "Terry L Karges Sr - Petersen Automotive Museum | LinkedIn",
-    link: "https://www.linkedin.com/in/terry-l-karges-sr-64029415",
-    htmlTitle:
-      "Terry L Karges Sr - Petersen <b>Automotive</b> Museum | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "Dec 8, 2016 <b>...</b> Experience: Petersen <b>Automotive</b> Museum Â· Location: Los Angeles Â· 500+ connections on LinkedIn. View Terry L Karges Sr&#39;s profile on LinkedIn,&nbsp;...",
-  },
-  {
-    id: 4,
-    title: "John Cavanaugh - CFO - Automotive Credit Corp | LinkedIn",
-    link: "https://www.linkedin.com/in/john-cavanaugh-896b87a",
-    htmlTitle:
-      "John Cavanaugh - <b>CFO</b> - <b>Automotive</b> Credit Corp | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "<b>CFO</b> at <b>Automotive</b> Credit Corp Â· Experience: <b>Automotive</b> Credit Corp Â· Location: Northville Â· 500+ connections on LinkedIn. View John Cavanaugh&#39;s profile on&nbsp;...",
-  },
-  {
-    id: 5,
-    title: "John Bozzella - Alliance For Automotive Innovation | LinkedIn",
-    link: "https://www.linkedin.com/in/john-bozzella",
-    htmlTitle:
-      "John Bozzella - Alliance For <b>Automotive</b> Innovation | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "John Bozzella, a veteran auto industry <b>executive</b> and policy leader, is the president andâ€¦ Â· Experience: Alliance For <b>Automotive</b> Innovation Â· Education:&nbsp;...",
-  },
-  {
-    id: 6,
-    title: "Lubomir Stanislavov - CEO - Automotive Cluster Bulgaria | LinkedIn",
-    link: "https://bg.linkedin.com/in/lubomir-stanislavov-7313b611",
-    htmlTitle:
-      "Lubomir Stanislavov - <b>CEO</b> - <b>Automotive</b> Cluster Bulgaria | LinkedIn",
-    displayLink: "bg.linkedin.com",
-    htmlSnippet:
-      "<b>CEO</b> at <b>Automotive</b> Cluster Bulgaria Â· Experience: <b>Automotive</b> Cluster Bulgaria Â· Education: University of Architecture, Civil Engineering and Geodesy, Sofia,&nbsp;...",
-  },
-  {
-    id: 7,
-    title: "Scott LeTourneau - Cox Automotive Inc. | LinkedIn",
-    link: "https://www.linkedin.com/in/sletourneau",
-    htmlTitle: "Scott LeTourneau - Cox <b>Automotive</b> Inc. | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "Specialties: Corporate strategy, mergers, acquisitions, divestitures, strategicâ€¦ Â· Experience: Cox <b>Automotive</b> Inc. Â· Education: University of Virginia&nbsp;...",
-  },
-  {
-    id: 8,
-    title: "Judy Curran - ANSYS, Inc. | LinkedIn",
-    link: "https://www.linkedin.com/in/judycurran",
-    htmlTitle: "Judy Curran - ANSYS, Inc. | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "<b>Executive</b> Board Member. Inforum <b>Automotive</b> Next. Oct 2014 - Oct 2017 3 years 1 month. Patents. Air fuel ratio feedback control. Issued November 1, 1994 US&nbsp;...",
-  },
-  {
-    id: 9,
-    title: "Logan Pitts - AGS Company Automotive Solutions | LinkedIn",
-    link: "https://www.linkedin.com/in/logan-pitts-5598697",
-    htmlTitle:
-      "nLogan Pitts - AGS Company <b>Automotive</b> Solutions | LinkedIn",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "Experience: AGS Company <b>Automotive</b> Solutions Â· Location: Muskegon Â· 443 connections on LinkedIn. View Logan Pitts&#39; profile on LinkedIn, a professional&nbsp;...",
-  },
-  {
-    id: 10,
-    title: "Ben Burton - Executive General Manager - Dick Smith Automotive ...",
-    link: "https://www.linkedin.com/in/brian-mcculley-72596920",
-    htmlTitle:
-      "Ben Burton - <b>Executive</b> General Manager - Dick Smith <b>Automotive</b> ...",
-    displayLink: "www.linkedin.com",
-    htmlSnippet:
-      "<b>Executive</b> Manager: Flow Audi of Winston-Salem, Flow Acura of Winston-Salem ... <b>Automotive</b> Companies Â· Education: Duke University Â· Location: Winston&nbsp;...",
-  },
-];
+
 const App = () => {
   const gitAgentbuttonref = useRef(null);
   const switchValue =
@@ -107,14 +9,19 @@ const App = () => {
   const [gitAgentShow, setGitAgentShow] = useState(false);
   const [isOn, setIsOn] = useState(switchValue || false);
   const [query, setQuery] = useState(localStorage.getItem("query") || "");
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handleCheckboxChange = (item) => {
+    setSelectedItem(item); // Set the selected item to the current ID, unselecting others
+  };
+  console.log(selectedItem);
   const [apiData, setApiData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [emailIsOpen, setEmailIsOpen] = useState(false);
+  const [responseSendMessageData, setResponseSendMessageData] = useState({});
+  console.log(responseSendMessageData);
   useEffect(() => {
-    // Define the async function inside useEffect
     const fetchData = async () => {
       try {
         const response = await axios.get(
@@ -130,20 +37,29 @@ const App = () => {
 
     fetchData();
   }, []);
-  console.log(apiData);
-  const handleCheckboxChange = (id) => {
-    setSelectedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
+  //  `https://utilities.jivahire.com/service5/generate-marketing-pitch/?x_api_key=ZBFezMmBuh2pkEXttdz6SwOeMgGGsG2b`
+  const handleSendMessage = async () => {
+    const formData = {
+      project_details: selectedItem?.project_details,
+      industry_type: selectedItem?.industries,
+      prospect_name: selectedItem?.title,
+    };
+    try {
+      const response = await axios.post(
+        `https://stagingapi.jivahire.com/api/insight_generate/`,
+        formData
+      );
 
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(data.map((item) => item.id));
+      if (response?.data?.success) {
+        // toast.success(response?.data?.message);
+        setResponseSendMessageData(response?.data);
+        setEmailIsOpen(true);
+      } else {
+        toast.error(response?.data?.message || "An error occurred");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Network error");
     }
-    setSelectAll(!selectAll);
   };
 
   const handleStartOrStop = async () => {
@@ -178,27 +94,25 @@ const App = () => {
         <h1 className="text-lg font-bold tracking-wide">
           🌟 Lead Generation Agent
         </h1>
-        <div className="relative">
+      </div>
+
+      <div className="flex justify-between items-center gap-2">
+        <div className="relative mt-2">
           {/* Status Indicator */}
-          <div
-            className={`w-3 h-3 rounded-full absolute right-0 top-0 transform translate-x-1 -translate-y-1 ${
-              isOn ? "bg-green-400" : "bg-red-500"
-            }`}
-          ></div>
 
           {/* Git Agent Button */}
-          <div
+          <button
             onClick={() => setGitAgentShow(!gitAgentShow)}
-            className="uppercase bg-white text-blue-600 select-none cursor-pointer text-xs font-semibold border rounded-full w-8 h-8 flex justify-center items-center shadow-md hover:bg-gray-200 transition-all"
+            className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
           >
-            GA
-          </div>
+            Input Query
+          </button>
           {/* Git Agent Dropdown */}
 
           {gitAgentShow && (
             <div
               ref={gitAgentbuttonref}
-              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 w-[600px] h-[300px] font-inter flex flex-col gap-2"
+              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl left-2 top-12 w-[600px] h-[300px] font-inter flex flex-col gap-2"
             >
               {/* Query Input */}
               <div>Input Query</div>
@@ -220,30 +134,34 @@ const App = () => {
             </div>
           )}
         </div>
+        <div className="flex justify-end gap-2">
+          {" "}
+          <button
+            onClick={() => handleSendMessage()}
+            disabled={selectedItem?.length <= 0}
+            className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
+          >
+            Send Message
+          </button>
+          <button
+            // onClick={() => setEmailIsOpen(true)}
+            disabled={selectedItem?.length <= 0}
+            className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
+          >
+            Send Email
+          </button>
+        </div>
       </div>
       {/* Table Section */}
       {loading ? (
         "Loading..."
       ) : (
         <div className="overflow-x-auto py-6">
-          <div className="flex justify-end ">
-            {" "}
-            <button
-              onClick={() => setEmailIsOpen(true)}
-              disabled={selectedItems?.length <= 0}
-              className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
-            >
-              Send Email
-            </button>
-          </div>
           <table className="w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
             <thead className="bg-gradient-to-r from-gray-800 to-gray-600 text-white uppercase text-xs  tracking-wide shadow-md">
               <tr>
                 <th className="border px-4 py-3 text-center w-[110px]">
-                  {" "}
-                  <button onClick={handleSelectAll} className="">
-                    {selectAll ? "Unselect All" : "Select All"}
-                  </button>
+                  Select
                 </th>
                 <th className="border px-4 py-3 text-center">S.No</th>
                 <th className="border px-4 py-3 text-center">Title</th>
@@ -262,8 +180,9 @@ const App = () => {
                   <td className="border px-4 py-3 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(item.id)}
-                      onChange={() => handleCheckboxChange(item.id)}
+                      checked={selectedItem === item}
+                      onChange={() => handleCheckboxChange(item)}
+                      className="cursor-pointer"
                     />
                   </td>
                   <td className="border px-4 py-3 text-center">{index + 1}</td>
@@ -301,11 +220,48 @@ const App = () => {
         </div>
       )}
 
-      {false && (
+      {emailIsOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 font-inter">
-          <div className="bg-white p-4 rounded-md shadow-lg max-w-xl w-full ">
-            <div className="flex justify-end">
-              <div className="cursor-pointer w-4 h-4">X</div>
+          <div className="bg-white  rounded-md shadow-lg max-w-xl w-full ">
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center gap-2 w-full border-b p-4">
+                <strong>Customised Linkedin Message</strong>
+                <div
+                  className="cursor-pointer w-4 h-4"
+                  onClick={() => setEmailIsOpen(false)}
+                >
+                  X
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 p-4">
+                <div>
+                  <strong>Subject</strong>
+                  <div className="border rounded-lg p-4 ">
+                    {" "}
+                    {responseSendMessageData?.data?.subject}
+                  </div>
+                </div>
+                <div>
+                  <strong>Body</strong>
+                  <div className="border rounded-lg p-4 ">
+                    {" "}
+                    {responseSendMessageData?.data?.body}
+                  </div>
+                </div>
+                {/* <div>
+                  <strong>Message</strong>
+                  <div className="border rounded-lg p-4 ">
+                    {" "}
+                    {responseSendMessageData?.data?.message}
+                  </div>
+                </div> */}
+                <button
+                  disabled
+                  className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
+                >
+                  Send Message
+                </button>
+              </div>
             </div>
           </div>
         </div>
