@@ -112,7 +112,7 @@ const App = () => {
   const [apiData, setApiData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [emailIsOpen, setEmailIsOpen] = useState(false);
   useEffect(() => {
     // Define the async function inside useEffect
     const fetchData = async () => {
@@ -193,26 +193,27 @@ const App = () => {
           >
             GA
           </div>
-
           {/* Git Agent Dropdown */}
+
           {gitAgentShow && (
             <div
               ref={gitAgentbuttonref}
-              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 h-40 w-80 font-inter flex flex-col gap-2"
+              className="border p-4 rounded-lg text-xs absolute bg-white text-gray-700 shadow-xl right-2 top-12 w-[600px] h-[300px] font-inter flex flex-col gap-2"
             >
               {/* Query Input */}
               <div>Input Query</div>
               <textarea
-                rows={10}
+                rows={15}
                 value={query || ""}
                 type="text"
                 placeholder="Enter Project / POC details"
-                className="border outline-none px-3 py-2 w-full h-10 rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-400"
+                className="border outline-none px-3 py-2 w-full  rounded-lg text-gray-700 h-full"
                 onChange={(e) => setQuery(e.target.value)}
               />
               <button
                 className="bg-blue-400 text-white px-4 py-2 rounded-lg"
                 onClick={() => handleStartOrStop()}
+                disabled ={!query}
               >
                 Search Query
               </button>
@@ -228,6 +229,7 @@ const App = () => {
           <div className="flex justify-end ">
             {" "}
             <button
+              onClick={() => setEmailIsOpen(true)}
               disabled={selectedItems?.length <= 0}
               className=" bg-gradient-to-r from-blue-900 to-cyan-500 disabled:bg-gradient-to-r disabled:from-blue-400 disabled:to-cyan-300 text-white px-4 py-2  rounded-lg"
             >
@@ -296,6 +298,16 @@ const App = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {false && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 font-inter">
+          <div className="bg-white p-4 rounded-md shadow-lg max-w-xl w-full ">
+            <div className="flex justify-end">
+              <div className="cursor-pointer w-4 h-4">X</div>
+            </div>
+          </div>
         </div>
       )}
     </div>
